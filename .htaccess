@@ -1,0 +1,17 @@
+
+# Мониторинг by book777
+# Версия 3
+# Связь http://vk.com/im?sel=81824171
+
+
+DirectoryIndex index.php
+
+<FilesMatch ".(php)$">
+	Order Allow,Deny
+	Deny from all
+</FilesMatch>
+
+<Files index.php>
+	Order Allow,Deny
+	Allow from all
+</Files>
