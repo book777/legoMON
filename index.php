@@ -34,20 +34,8 @@ if($all['po'] > $file['record_day']) {// Если онлайн больше
 	$record['day'] = $all['po'];// Присвоить переменной онлайн
 }
 
-
-/*$file['record_day'] = readfile('cache/record_day.log');// Число временного
-if($all['po'] > $file['record_day']) {// Если онлайн больше
-	file_put_contents('cache/record_day.log', $all['po']);// Записать новый рекорд
-	$record['day'] = $all['po'];// Присвоить переменной онлайн
-} else
-	$record['day'] = $file['record_day'];// присвоить старый рекорд
-if(time() - $time['record_day'] > filemtime('cache/timefile.log')) {// Срабатывать раз в день
-	file_put_contents('cache/timefile.log', '');// записать заново файл времени
-	file_put_contents('cache/record_day.log', $all['po']);// и теперешний онлайн
-}*/
 $all['percent'] = @floor(($all['po']/$all['pm'])*100);
 $all['date'] = date_in_text(filemtime('cache/record.log'));
-#	 filemtime('cache/timefile.log')	touch($dir_img, $image['created']);// Присваиваем время добаления
 require_once 'template/all.php';
 
 
