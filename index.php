@@ -1,62 +1,73 @@
 ﻿<?php
 
 require_once 'config.php';
-if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))
-	exit;
 
-ob_start();
-foreach($server as $e) {
-	$get = server($e[0], $time['out']);
-	if($get['error'])
+if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))// Кеширование
+	die(readfile($file['template']));
+
+ob_start();// Включаем буфер
+
+foreach($server as $e) {// Обрабатываем каждый сервер
+	$get = server($e[0], $time['out']);// Получаем информацию
+	if($get['error'])// Если не удалось получить данные, выводим ошибку
 		include 'template/offline.php';
-	else {
-		if(count($server)>1) {
-			$all['po'] += $get['player_online'];
-			$all['pm'] += $get['player_max'];
-		}
+	else {// Если всё ок
+		$all['po'] += $get['player_online'];
+		$all['pm'] += $get['player_max'];
 		include 'template/online.php';
 	}
 }
 
-if($all['po'] > 0) {
-	$file['record'] =  file_get_contents('cache/record.log');
-	if($all['po'] >= $file['record']) {
-		file_put_contents('cache/record.log', $all['po']);
-		$record['all'] = $all['po'];
-	} else
-		$record['all'] = $file['record'];
-	$file['record_temp'] =  'cache/record_temp.log';
-	if($all['po'] >= file_get_contents($file['record_temp'])) {
-		file_put_contents($file['record_temp'], $all['po']);
-		$record['day'] = $all['po'];
-	} else
-		$record['day'] = $file['record'];
-	if(time() - $time['record_temp'] > filemtime('cache/timefile.log')){
-		file_put_contents('cache/timefile.log', '');
-		file_put_contents($file['day'], $all['po']);
-	}
-	$all['percent'] = @floor(($all['po']/$all['pm'])*100);
-	$all['date'] = date_in_text(filemtime('cache/record.log'));
-	require_once 'template/all.php';
+// Абсолютный рекорд
+$file['record'] =  readfile('cache/record.log');// Число абсолютного
+if($all['po'] >= $file['record']) {// Если теперь онлайн больше
+	file_put_contents('cache/record.log', $all['po']);// Записать новый рекорд
+	$record['all'] = $all['po'];// Присвоить переменной онлайн
+} else// если нет
+	$record['all'] = $file['record'];// присвоить старый рекорд
+
+// Рекорд за день
+$file['record_day'] = readfile('cache/record_day.log');// Число временного
+if($all['po'] > $file['record_day']) {// Если онлайн больше
+	filemtime('cache/timefile.log')
+	file_put_contents('cache/record_day.log', $all['po']);// Записать новый рекорд
+	$record['day'] = $all['po'];// Присвоить переменной онлайн
 }
 
-echo base64_decode(date_in_text(false, true));
-file_put_contents($file['template'], ob_get_contents());
+
+/*$file['record_day'] = readfile('cache/record_day.log');// Число временного
+if($all['po'] > $file['record_day']) {// Если онлайн больше
+	file_put_contents('cache/record_day.log', $all['po']);// Записать новый рекорд
+	$record['day'] = $all['po'];// Присвоить переменной онлайн
+} else
+	$record['day'] = $file['record_day'];// присвоить старый рекорд
+if(time() - $time['record_day'] > filemtime('cache/timefile.log')) {// Срабатывать раз в день
+	file_put_contents('cache/timefile.log', '');// записать заново файл времени
+	file_put_contents('cache/record_day.log', $all['po']);// и теперешний онлайн
+}*/
+$all['percent'] = @floor(($all['po']/$all['pm'])*100);
+$all['date'] = date_in_text(filemtime('cache/record.log'));
+#	 filemtime('cache/timefile.log')	touch($dir_img, $image['created']);// Присваиваем время добаления
+require_once 'template/all.php';
+
+
+echo base64_decode(date_in_text(false, true));// Делаем подпись
+file_put_contents($file['template'], ob_get_contents());// Сохраняем вывод в файл
 
 function server($address, $timeout) {
 	$thetime = microtime(true);
 	if(!$in = @fsockopen($address, 25565, $errno, $errstr, $timeout)) {
 		if(round((microtime(true)-$thetime)*1000) >= $timeout * 1000)
-			return array('error' => 'Большой пинг');
+																												return array('error' => 'Большой пинг');
 		else
-			return array('error' => 'Выключен');
+																												return array('error' => 'Выключен');
 	}
 	@stream_set_timeout($in, $timeout);
 	fwrite($in, "\xFE\x01");
 	$data = fread($in, 512);
 	$Len = strlen($data);
 	if($Len < 4 || $data[0] !== "\xFF")
-		return array('error' => 'Неизвестная ошибка');
+																												return array('error' => 'Неизвестное ядро');
 	$data = substr($data, 3);
 	$data = iconv('UTF-16BE', 'UTF-8', $data);
 	if($data [1] === "\xA7" && $data[2] === "\x31") {
@@ -88,7 +99,7 @@ function motd($text) {
 		$out .= substr($val, 1);
 	return $out;
 }
-function motd_html($minetext) {
+function motd_html($minetext) {// Вывод названия сервера с цветами
 	preg_match_all('/[§&][0-9a-z][^§&]*/', $minetext, $brokenupstrings);
 	foreach ($brokenupstrings as $results) {
 		$ending = '';
@@ -133,10 +144,10 @@ function motd_html($minetext) {
 	}
 	return $returnstring;
 }
-function date_in_text($data, $up = false) {
+function date_in_text($data, $up = false) {// Дата для рекордов + подпись
 	$iz = array("Jan",		"Feb",		"Mar",		"Apr",		"May",	"Jun",		"Jul",		"Aug",		"Sep",			"Jct",			"Nov",		"Dec");
 	$v = array("января",	"феваля",	"марта",	"апреля",	"мая",	"июня",	"июля",	"августа",	"сентября",	"октября",	"ноября",	"декабря");
-	$vblhod = str_replace($iz, $v, date("j M в H:i", $data));	if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
+	$vblhod = str_replace($iz, $v, date("j M в H:i", $data));if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
 	return $vblhod;
 }
 ?>
