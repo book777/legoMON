@@ -1,9 +1,13 @@
 ﻿<?php
 
-$server[]= array('176.9.120.79:25566', 'GalaxyTech', 'http://lemoncraft.ru/MagicTech.html');
-$server[]= array('176.9.120.79:25567', 'Technology (PVE-PVP)', 'http://lemoncraft.ru/MagicTech.html');
+$server[]= array('site.ru', 'MagicTech', 'http://site.ru/MagicTech.html');
+$server[]= array('site.ru:25567', 'Technology (PVE-PVP)', 'http://site.ru/Technology.html');
+$server[]= array('localhost', 'SERVER (PVE-PVP)');
+$server[]= array('127.0.0.1', 'VEGAS LITE');
 
-$file['template'] = '../templates/Default/book777.tpl';// для DLE
+
+// Необходимо выбрать 1 из параметров, убрав у нужной строчки #
+#$file['template'] = '../templates/Default/book777.tpl';// для DLE
 #$file['template'] = '../style/default/book777.html';// для webMCR
 
 

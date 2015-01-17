@@ -19,7 +19,7 @@ foreach($server as $e) {// Обрабатываем каждый сервер
 }
 
 // Абсолютный рекорд
-$file['record'] =  readfile('cache/record.log');// Число абсолютного
+$file['record'] =  file_get_contents('cache/record.log');// Число абсолютного
 if($all['po'] >= $file['record']) {// Если теперь онлайн больше
 	file_put_contents('cache/record.log', $all['po']);// Записать новый рекорд
 	$record['all'] = $all['po'];// Присвоить переменной онлайн
@@ -27,35 +27,47 @@ if($all['po'] >= $file['record']) {// Если теперь онлайн бол�
 	$record['all'] = $file['record'];// присвоить старый рекорд
 
 // Рекорд за день
-$file['record_day'] = readfile('cache/record_day.log');// Число временного
+$file['record_day'] = file_get_contents('cache/record_day.log');// Число временного
 if($all['po'] > $file['record_day']) {// Если онлайн больше
-	filemtime('cache/timefile.log')
 	file_put_contents('cache/record_day.log', $all['po']);// Записать новый рекорд
+	$record['day'] = $all['po'];// Присвоить переменной онлайн
+} else// если нет
+	$record['day'] = $file['record_day'];// присвоить старый рекорд
+if(time() - $time['record_day'] > filemtime('cache/timefile.log')){// Если временной файл создан больше дня назад
+	file_put_contents('cache/timefile.log', '');// перезаписываем временный файл
+	file_put_contents('cache/record_day.log', $all['po']);// и перезаписываем теперешний онлайн
 	$record['day'] = $all['po'];// Присвоить переменной онлайн
 }
 
-$all['percent'] = @floor(($all['po']/$all['pm'])*100);
-$all['date'] = date_in_text(filemtime('cache/record.log'));
-require_once 'template/all.php';
-
+$all['percent'] = @floor(($all['po']/$all['pm'])*100);// % общего онлайна
+$all['date'] = date_in_text(filemtime('cache/record.log'));// вывод красивой даты изменения файла
+require_once 'template/all.php';// Выводим общий онлайн
 
 echo base64_decode(date_in_text(false, true));// Делаем подпись
 file_put_contents($file['template'], ob_get_contents());// Сохраняем вывод в файл
+
+
 
 function server($address, $timeout) {
 	$thetime = microtime(true);
 	if(!$in = @fsockopen($address, 25565, $errno, $errstr, $timeout)) {
 		if(round((microtime(true)-$thetime)*1000) >= $timeout * 1000)
-																												return array('error' => 'Большой пинг');
+			return array(
+																												'error' => 'Большой пинг'
+			);
 		else
-																												return array('error' => 'Выключен');
+			return array(
+																												'error' => 'Выключен'
+			);
 	}
 	@stream_set_timeout($in, $timeout);
 	fwrite($in, "\xFE\x01");
 	$data = fread($in, 512);
 	$Len = strlen($data);
 	if($Len < 4 || $data[0] !== "\xFF")
-																												return array('error' => 'Неизвестное ядро');
+		return array(
+																												'error' => 'Неизвестное ядро'
+		);
 	$data = substr($data, 3);
 	$data = iconv('UTF-16BE', 'UTF-8', $data);
 	if($data [1] === "\xA7" && $data[2] === "\x31") {
