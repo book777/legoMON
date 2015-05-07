@@ -11,7 +11,7 @@ $server[]= array('127.0.0.1', 'VEGAS LITE');
 #$file['template'] = '../style/default/book777.html';// для webMCR
 
 
-
+//$style = true;// Подключить силь
 $time['cache'] = 55;// Кеширование (сек)
 $time['out'] = 2;// Максимальное время отклика сервера
 $time['record_day'] = 86400;// Частота обновления временного рекорда (86400 сек = 24 ч)

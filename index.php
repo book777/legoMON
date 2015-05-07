@@ -1,153 +1,209 @@
-п»ї<?php
+<?php
 
 require_once 'config.php';
 
-if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))// РљРµС€РёСЂРѕРІР°РЅРёРµ
+if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))// Кеширование
 	die(readfile($file['template']));
 
-ob_start();// Р’РєР»СЋС‡Р°РµРј Р±СѓС„РµСЂ
+ob_start();// Включаем буфер
 
-foreach($server as $e) {// РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РєР°Р¶РґС‹Р№ СЃРµСЂРІРµСЂ
-	$get = server($e[0], $time['out']);// РџРѕР»СѓС‡Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ
-	if($get['error'])// Р•СЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ, РІС‹РІРѕРґРёРј РѕС€РёР±РєСѓ
+if($style) echo '<link href="http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/template/style.css" rel="stylesheet" type="text/css" media="screen" />';
+
+$temp = new MinecraftServer();// Инициализируем мониторинг
+foreach($server as $e) {// Обрабатываем каждый сервер
+	$get = $temp->getq($e[0], $time['out']);// Получаем информацию
+	if($get['error'])// Если не удалось получить данные, выводим ошибку
 		include 'template/offline.php';
-	else {// Р•СЃР»Рё РІСЃС‘ РѕРє
+	else {// Если всё ок
 		$all['po'] += $get['player_online'];
 		$all['pm'] += $get['player_max'];
 		include 'template/online.php';
 	}
 }
 
-// РђР±СЃРѕР»СЋС‚РЅС‹Р№ СЂРµРєРѕСЂРґ
-$file['record'] =  file_get_contents('cache/record.log');// Р§РёСЃР»Рѕ Р°Р±СЃРѕР»СЋС‚РЅРѕРіРѕ
-if($all['po'] >= $file['record']) {// Р•СЃР»Рё С‚РµРїРµСЂСЊ РѕРЅР»Р°Р№РЅ Р±РѕР»СЊС€Рµ
-	file_put_contents('cache/record.log', $all['po']);// Р—Р°РїРёСЃР°С‚СЊ РЅРѕРІС‹Р№ СЂРµРєРѕСЂРґ
-	$record['all'] = $all['po'];// РџСЂРёСЃРІРѕРёС‚СЊ РїРµСЂРµРјРµРЅРЅРѕР№ РѕРЅР»Р°Р№РЅ
-} else// РµСЃР»Рё РЅРµС‚
-	$record['all'] = $file['record'];// РїСЂРёСЃРІРѕРёС‚СЊ СЃС‚Р°СЂС‹Р№ СЂРµРєРѕСЂРґ
+// Абсолютный рекорд
+$file['record'] =  file_get_contents('cache/record.log');// Число абсолютного
+if($all['po'] >= $file['record']) {// Если теперь онлайн больше
+	file_put_contents('cache/record.log', $all['po']);// Записать новый рекорд
+	$record['all'] = $all['po'];// Присвоить переменной онлайн
+} else// если нет
+	$record['all'] = $file['record'];// присвоить старый рекорд
 
-// Р РµРєРѕСЂРґ Р·Р° РґРµРЅСЊ
-$file['record_day'] = file_get_contents('cache/record_day.log');// Р§РёСЃР»Рѕ РІСЂРµРјРµРЅРЅРѕРіРѕ
-if($all['po'] > $file['record_day']) {// Р•СЃР»Рё РѕРЅР»Р°Р№РЅ Р±РѕР»СЊС€Рµ
-	file_put_contents('cache/record_day.log', $all['po']);// Р—Р°РїРёСЃР°С‚СЊ РЅРѕРІС‹Р№ СЂРµРєРѕСЂРґ
-	$record['day'] = $all['po'];// РџСЂРёСЃРІРѕРёС‚СЊ РїРµСЂРµРјРµРЅРЅРѕР№ РѕРЅР»Р°Р№РЅ
-} else// РµСЃР»Рё РЅРµС‚
-	$record['day'] = $file['record_day'];// РїСЂРёСЃРІРѕРёС‚СЊ СЃС‚Р°СЂС‹Р№ СЂРµРєРѕСЂРґ
-if(time() - $time['record_day'] > filemtime('cache/timefile.log')){// Р•СЃР»Рё РІСЂРµРјРµРЅРЅРѕР№ С„Р°Р№Р» СЃРѕР·РґР°РЅ Р±РѕР»СЊС€Рµ РґРЅСЏ РЅР°Р·Р°Рґ
-	file_put_contents('cache/timefile.log', '');// РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµРј РІСЂРµРјРµРЅРЅС‹Р№ С„Р°Р№Р»
-	file_put_contents('cache/record_day.log', $all['po']);// Рё РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµРј С‚РµРїРµСЂРµС€РЅРёР№ РѕРЅР»Р°Р№РЅ
-	$record['day'] = $all['po'];// РџСЂРёСЃРІРѕРёС‚СЊ РїРµСЂРµРјРµРЅРЅРѕР№ РѕРЅР»Р°Р№РЅ
+// Рекорд за день
+$file['record_day'] = file_get_contents('cache/record_day.log');// Число временного
+if($all['po'] > $file['record_day']) {// Если онлайн больше
+	file_put_contents('cache/record_day.log', $all['po']);// Записать новый рекорд
+	$record['day'] = $all['po'];// Присвоить переменной онлайн
+} else// если нет
+	$record['day'] = $file['record_day'];// присвоить старый рекорд
+if(time() - $time['record_day'] > filemtime('cache/timefile.log')){// Если временной файл создан больше дня назад
+	file_put_contents('cache/timefile.log', '');// перезаписываем временный файл
+	file_put_contents('cache/record_day.log', $all['po']);// и перезаписываем теперешний онлайн
+	$record['day'] = $all['po'];// Присвоить переменной онлайн
 }
 
-$all['percent'] = @floor(($all['po']/$all['pm'])*100);// % РѕР±С‰РµРіРѕ РѕРЅР»Р°Р№РЅР°
-$all['date'] = date_in_text(filemtime('cache/record.log'));// РІС‹РІРѕРґ РєСЂР°СЃРёРІРѕР№ РґР°С‚С‹ РёР·РјРµРЅРµРЅРёСЏ С„Р°Р№Р»Р°
-require_once 'template/all.php';// Р’С‹РІРѕРґРёРј РѕР±С‰РёР№ РѕРЅР»Р°Р№РЅ
+$all['percent'] = @floor(($all['po']/$all['pm'])*100);// % общего онлайна
+$all['date'] = date_in_text(filemtime('cache/record.log'));// вывод красивой даты изменения файла
+require_once 'template/all.php';// Выводим общий онлайн
 
-echo base64_decode(date_in_text(false, true));// Р”РµР»Р°РµРј РїРѕРґРїРёСЃСЊ
-file_put_contents($file['template'], ob_get_contents());// РЎРѕС…СЂР°РЅСЏРµРј РІС‹РІРѕРґ РІ С„Р°Р№Р»
+echo base64_decode(date_in_text(false, true));// Делаем подпись
+file_put_contents($file['template'], ob_get_contents());// Сохраняем вывод в файл
 
 
 
-function server($address, $timeout) {
-	$thetime = microtime(true);
-	if(!$in = @fsockopen($address, 25565, $errno, $errstr, $timeout)) {
-		if(round((microtime(true)-$thetime)*1000) >= $timeout * 1000)
-			return array(
-																												'error' => 'Р‘РѕР»СЊС€РѕР№ РїРёРЅРі'
-			);
-		else
-			return array(
-																												'error' => 'Р’С‹РєР»СЋС‡РµРЅ'
-			);
-	}
-	@stream_set_timeout($in, $timeout);
-	fwrite($in, "\xFE\x01");
-	$data = fread($in, 512);
-	$Len = strlen($data);
-	if($Len < 4 || $data[0] !== "\xFF")
-		return array(
-																												'error' => 'РќРµРёР·РІРµСЃС‚РЅРѕРµ СЏРґСЂРѕ'
-		);
-	$data = substr($data, 3);
-	$data = iconv('UTF-16BE', 'UTF-8', $data);
-	if($data [1] === "\xA7" && $data[2] === "\x31") {
-		$data = explode("\x00", $data);
-		return  array(
-			'motd' => motd($data[3]),
-			'motd_html' => motd_html($data[3]),
-			'player_online' => intval($data[4]),
-			'player_max' => intval($data[5]),
-			'percent' => @floor((intval($data[4])/intval($data[5]))*100),
-			'version' => $data[2],
-			'ping' => round((microtime(true)-$thetime)*1000)
-		);
-	}
-	$data = explode("\xA7", $data);
-	return array(
-		'motd' => motd(substr($data[0], 0, -1)),
-		'motd_html' => motd_html(substr($data[0], 0, -1)),
-		'player_online' => isset($data[1]) ? intval($data[1]) : 0,
-		'player_max' => isset($data[2]) ? intval($data[2]) : 0,
-		'percent' => @floor((intval($data[1])/intval($data[2]))*100),
-		'version' => '< 1.4',
-		'ping' => round((microtime(true)-$thetime)*1000)
-	);
-}
-function motd($text) {
-	$mass = explode('В§', $text);
-	foreach ($mass as $val)
-		$out .= substr($val, 1);
-	return $out;
-}
-function motd_html($minetext) {// Р’С‹РІРѕРґ РЅР°Р·РІР°РЅРёСЏ СЃРµСЂРІРµСЂР° СЃ С†РІРµС‚Р°РјРё
-	preg_match_all('/[В§&][0-9a-z][^В§&]*/', $minetext, $brokenupstrings);
-	foreach ($brokenupstrings as $results) {
-		$ending = '';
-			foreach ($results as $individual) {
-				$code = preg_split('/[&В§][0-9a-z]/', $individual);
-				preg_match('/[&В§][0-9a-z]/', $individual, $prefix);
-				if (isset($prefix[0])) {
-					$actualcode = substr($prefix[0], 1);
-					switch ($actualcode) {
-						case '1': $returnstring .= '<font color="0000AA">'; $ending .= '</font>'; break;
-						case '2': $returnstring .= '<font color="00AA00">'; $ending .= '</font>'; break;
-						case '3': $returnstring .= '<font color="00AAAA">'; $ending .= '</font>'; break;
-						case '4': $returnstring .= '<font color="AA0000">'; $ending .= '</font>'; break;
-						case '5': $returnstring .= '<font color="AA00AA">'; $ending .= '</font>'; break;
-						case '6': $returnstring .= '<font color="FFAA00">'; $ending .= '</font>'; break;
-						case '7': $returnstring .= '<font color="AAAAAA">'; $ending .= '</font>'; break;
-						case '8': $returnstring .= '<font color="555555">'; $ending .= '</font>'; break;
-						case '9': $returnstring .= '<font color="5555FF">'; $ending .= '</font>'; break;
-						case 'a': $returnstring .= '<font color="55FF55">'; $ending .= '</font>'; break;
-						case 'b': $returnstring .= '<font color="55FFFF">'; $ending .= '</font>'; break;
-						case 'c': $returnstring .= '<font color="FF5555">'; $ending .= '</font>'; break;
-						case 'd': $returnstring .= '<font color="FF55FF">'; $ending .= '</font>'; break;
-						case 'e': $returnstring .= '<font color="FFFF55">'; $ending .= '</font>'; break;
-						case 'f': $returnstring .= '<font color="FFFFFF">'; $ending .= '</font>'; break;
-						case 'r': $returnstring .= $ending; $ending = ''; break;
-						case 'l': if (strlen($individual) > 2) { $returnstring .= '<b>'; $ending = '</b>'.$ending; break; }
-						case 'm': if (strlen($individual) > 2) { $returnstring .= '<strike>'; $ending = '</strike>'.$ending; break; }
-						case 'n': if (strlen($individual) > 2) { $returnstring .= '<span style="text-decoration:underline">'; $ending = '</span>'.$ending; break; }
-						case 'o': if (strlen($individual)>2) { $returnstring .= '<i>'; $ending ='</i>'.$ending; break; }
-					}
-					if (isset($code[1])) {
-						$returnstring .= $code[1];
-						if (isset($ending) && strlen($individual) > 2) {
-							$returnstring .= $ending;
-							$ending = '';
-						}
-					}
-				} else {
-			$returnstring .= $individual;
-			}
+
+class MinecraftServer {// Class written by xPaw & modded by book777
+	const STATISTIC = 0x00;
+	const HANDSHAKE = 0x09;
+	private $socket;
+	function getp($address, $timeout = 3) {// Ping
+		$thetime = microtime(true);
+		if(!$in = @fsockopen($address, 25565, $errno, $errstr, $timeout))
+			return [
+				'address' => $address,
+				'error' => 'Выключен'
+			];
+		if(round((microtime(true)-$thetime)*1000) > $timeout * 1000)
+			return [
+				'address' => $address,
+				'error' => 'Большой пинг'
+			];
+		@stream_set_timeout($in, $timeout);
+		$ping = round((microtime(true)-$thetime)*1000);
+		fwrite($in, "\xFE\x01");
+		$data = fread($in, 4096);
+		$Len = strlen($data);
+		if($Len < 4 || $data[0] !== "\xFF")
+			return [
+				'address' => $address,
+				'error' => 'Неизвестное ядро'
+			];
+		$data = substr($data, 3);
+		$data = iconv('UTF-16BE', 'UTF-8', $data);
+		if($data [1] === "\xA7" && $data[2] === "\x31") {
+			$data = explode("\x00", $data);
+			return  [
+				'address' => $address,
+				'player_online' => intval($data[4]),
+				'motd' => $this->motd($data[3]),
+				'type' => $data[0],
+				'player_max' => intval($data[5]),
+				'percent' => @floor((intval($data[4])/intval($data[5]))*100),
+				'version' => $data[2],
+				'ping' => $ping
+			];
 		}
+		$data = explode("\xA7", $data);
+		return [
+			'address' => $address,
+			'player_online' => isset($data[1]) ? intval($data[1]) : 0,
+			'player_max' => isset($data[2]) ? intval($data[2]) : 0,
+			'percent' => @floor((intval($data[1])/intval($data[2]))*100),
+			'version' => '< 1.4',
+			'ping' => $ping
+		];
 	}
-	return $returnstring;
+	function getq($address, $timeout = 3) {// Query
+		$thetime = microtime(true);
+		$this->socket = @fsockopen('udp://'.$address, 25565, $ErrNo, $ErrStr, $timeout);
+		if($this->socket === false)
+			return [
+				'error' => 'Выключен',
+				'address' => $address
+			];
+		stream_set_timeout($this->socket, $timeout);
+		stream_set_blocking($this->socket, true);
+		$Challenge = $this->GetChallenge();
+		$info = ['ping' => round((microtime(true)-$thetime)*1000)];
+		$data = $this->writedata(self :: STATISTIC, $Challenge.Pack('c*', 0x00, 0x00, 0x00, 0x00));
+		if(!$data)
+			return $this->getp($address, $timeout);// Пробуем получить данные обычным способом
+		fclose($this->socket);
+		$Last = '';
+		$data = substr($data, 11);
+		$data = explode("\x00\x00\x01player_\x00\x00", $data);
+		if(count($data) !== 2)
+			return [
+				'error' => 'Неудачная дешифрация имен',
+				'address' => $address
+			];
+		$info['names'] = explode("\x00", substr($data[1], 0, -2));
+		$data = explode("\x00", $data[0]);
+		$Keys = [
+			'numplayers' => 'player_online',
+			'maxplayers' => 'player_max',
+			'hostname' => 'motd',
+			'version' => 'version',
+			'gametype' => 'type',
+			'game_id' => 'game',
+			'plugins' => 'plugins',
+			'map' => 'map'
+		];
+		if($info['plugins']) {
+			$data = explode(': ', $info['plugins'], 2);
+			$info['core'] = $data[0];
+			if(sizeof($data) == 2)
+				$info['plugins'] = explode('; ', $data[1]);
+		} else {
+			$info['core'] = $info['plugins'];
+			unset($info['plugins']);
+		}
+		foreach($data as $Key => $Value) {
+			if(~$Key & 1) {
+				if(!array_key_exists($Value, $Keys)) {
+					$Last = false;
+					continue;
+				}
+				$Last = $Keys[$Value];
+				$info[$Last] = '';
+			}
+			else if($Last != false)
+				$info[$Last] = $Value;
+		}
+		$info += [
+			'address' => $address,
+			'player_online' => intval($info['player_online']),
+			'player_max' => intval($info['player_max']),
+			'percent' => @floor(($info['player_online']/$info['player_max'])*100)
+		];
+		return $info;
+	}
+	private function writedata($command, $Append = '') {
+		$command = Pack('c*', 0xFE, 0xFD, $command, 0x01, 0x02, 0x03, 0x04).$Append;
+		$Length = strlen($command);
+		if( $Length !== fwrite($this->socket, $command, $Length))
+			return [
+				'error' => 'Неудачный запрос'
+			];
+		$data = fread($this->socket, 4096);
+		if( $data === false )
+			return [
+				'error' => 'Не удалось прочитать ответ'
+			];
+		if(strlen($data) < 5 || $data[0] != $command[2])
+			return false;
+		return substr($data, 5);
+	}
+	private function motd($text) {
+		$mass = explode('§', $text);
+		foreach ($mass as $val)
+			$out .= substr($val, 1);
+		return $out;
+	}
+	private function GetChallenge() {
+		$data = $this->writedata(self :: HANDSHAKE);
+		if($data === false)
+			return [
+				'error' => 'failed to receive challenge'
+			];
+		return Pack('N', $data);
+	}
 }
-function date_in_text($data, $up = false) {// Р”Р°С‚Р° РґР»СЏ СЂРµРєРѕСЂРґРѕРІ + РїРѕРґРїРёСЃСЊ
+
+function date_in_text($data, $up = false) {// Дата для рекордов + подпись
 	$iz = array("Jan",		"Feb",		"Mar",		"Apr",		"May",	"Jun",		"Jul",		"Aug",		"Sep",			"Jct",			"Nov",		"Dec");
-	$v = array("СЏРЅРІР°СЂСЏ",	"С„РµРІР°Р»СЏ",	"РјР°СЂС‚Р°",	"Р°РїСЂРµР»СЏ",	"РјР°СЏ",	"РёСЋРЅСЏ",	"РёСЋР»СЏ",	"Р°РІРіСѓСЃС‚Р°",	"СЃРµРЅС‚СЏР±СЂСЏ",	"РѕРєС‚СЏР±СЂСЏ",	"РЅРѕСЏР±СЂСЏ",	"РґРµРєР°Р±СЂСЏ");
-	$vblhod = str_replace($iz, $v, date("j M РІ H:i", $data));if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
+	$v = array("января",	"феваля",	"марта",	"апреля",	"мая",	"июня",	"июля",	"августа",	"сентября",	"октября",	"ноября",	"декабря");
+	$vblhod = str_replace($iz, $v, date("j M в H:i", $data));if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
 	return $vblhod;
 }
 ?>
