@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 
 # Monitoring by book777
 # Contact http://vk.com/im?sel=81824171
 
-
-=======
->>>>>>> origin/master
 DirectoryIndex index.php
 
 <FilesMatch ".(php)$">

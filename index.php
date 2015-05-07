@@ -1,53 +1,53 @@
-<?php
+Ôªø<?php
 
 require_once 'config.php';
 
-if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))//  Â¯ËÓ‚‡ÌËÂ
+if (file_exists($file['template']) & time() - $time['cache'] < filectime($file['template']))// –ö–µ—à–∏—Ä–æ–≤–∞–Ω–∏–µ
 	die(readfile($file['template']));
 
-ob_start();// ¬ÍÎ˛˜‡ÂÏ ·ÛÙÂ
+ob_start();// –í–∫–ª—é—á–∞–µ–º –±—É—Ñ–µ—Ä
 
 if($style) echo '<link href="http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/template/style.css" rel="stylesheet" type="text/css" media="screen" />';
 
-$temp = new MinecraftServer();// »ÌËˆË‡ÎËÁËÛÂÏ ÏÓÌËÚÓËÌ„
-foreach($server as $e) {// Œ·‡·‡Ú˚‚‡ÂÏ Í‡Ê‰˚È ÒÂ‚Â
-	$get = $temp->getq($e[0], $time['out']);// œÓÎÛ˜‡ÂÏ ËÌÙÓÏ‡ˆË˛
-	if($get['error'])// ≈ÒÎË ÌÂ Û‰‡ÎÓÒ¸ ÔÓÎÛ˜ËÚ¸ ‰‡ÌÌ˚Â, ‚˚‚Ó‰ËÏ Ó¯Ë·ÍÛ
+$temp = new MinecraftServer();// –ò–Ω–∏—Ü–∏–∞–ª–∏–∑–∏—Ä—É–µ–º –º–æ–Ω–∏—Ç–æ—Ä–∏–Ω–≥
+foreach($server as $e) {// –û–±—Ä–∞–±–∞—Ç—ã–≤–∞–µ–º –∫–∞–∂–¥—ã–π —Å–µ—Ä–≤–µ—Ä
+	$get = $temp->getq($e[0], $time['out']);// –ü–æ–ª—É—á–∞–µ–º –∏–Ω—Ñ–æ—Ä–º–∞—Ü–∏—é
+	if($get['error'])// –ï—Å–ª–∏ –Ω–µ —É–¥–∞–ª–æ—Å—å –ø–æ–ª—É—á–∏—Ç—å –¥–∞–Ω–Ω—ã–µ, –≤—ã–≤–æ–¥–∏–º –æ—à–∏–±–∫—É
 		include 'template/offline.php';
-	else {// ≈ÒÎË ‚Ò∏ ÓÍ
+	else {// –ï—Å–ª–∏ –≤—Å—ë –æ–∫
 		$all['po'] += $get['player_online'];
 		$all['pm'] += $get['player_max'];
 		include 'template/online.php';
 	}
 }
 
-// ¿·ÒÓÎ˛ÚÌ˚È ÂÍÓ‰
-$file['record'] =  file_get_contents('cache/record.log');// ◊ËÒÎÓ ‡·ÒÓÎ˛ÚÌÓ„Ó
-if($all['po'] >= $file['record']) {// ≈ÒÎË ÚÂÔÂ¸ ÓÌÎ‡ÈÌ ·ÓÎ¸¯Â
-	file_put_contents('cache/record.log', $all['po']);// «‡ÔËÒ‡Ú¸ ÌÓ‚˚È ÂÍÓ‰
-	$record['all'] = $all['po'];// œËÒ‚ÓËÚ¸ ÔÂÂÏÂÌÌÓÈ ÓÌÎ‡ÈÌ
-} else// ÂÒÎË ÌÂÚ
-	$record['all'] = $file['record'];// ÔËÒ‚ÓËÚ¸ ÒÚ‡˚È ÂÍÓ‰
+// –ê–±—Å–æ–ª—é—Ç–Ω—ã–π —Ä–µ–∫–æ—Ä–¥
+$file['record'] =  file_get_contents('cache/record.log');// –ß–∏—Å–ª–æ –∞–±—Å–æ–ª—é—Ç–Ω–æ–≥–æ
+if($all['po'] >= $file['record']) {// –ï—Å–ª–∏ —Ç–µ–ø–µ—Ä—å –æ–Ω–ª–∞–π–Ω –±–æ–ª—å—à–µ
+	file_put_contents('cache/record.log', $all['po']);// –ó–∞–ø–∏—Å–∞—Ç—å –Ω–æ–≤—ã–π —Ä–µ–∫–æ—Ä–¥
+	$record['all'] = $all['po'];// –ü—Ä–∏—Å–≤–æ–∏—Ç—å –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π –æ–Ω–ª–∞–π–Ω
+} else// –µ—Å–ª–∏ –Ω–µ—Ç
+	$record['all'] = $file['record'];// –ø—Ä–∏—Å–≤–æ–∏—Ç—å —Å—Ç–∞—Ä—ã–π —Ä–µ–∫–æ—Ä–¥
 
-// –ÂÍÓ‰ Á‡ ‰ÂÌ¸
-$file['record_day'] = file_get_contents('cache/record_day.log');// ◊ËÒÎÓ ‚ÂÏÂÌÌÓ„Ó
-if($all['po'] > $file['record_day']) {// ≈ÒÎË ÓÌÎ‡ÈÌ ·ÓÎ¸¯Â
-	file_put_contents('cache/record_day.log', $all['po']);// «‡ÔËÒ‡Ú¸ ÌÓ‚˚È ÂÍÓ‰
-	$record['day'] = $all['po'];// œËÒ‚ÓËÚ¸ ÔÂÂÏÂÌÌÓÈ ÓÌÎ‡ÈÌ
-} else// ÂÒÎË ÌÂÚ
-	$record['day'] = $file['record_day'];// ÔËÒ‚ÓËÚ¸ ÒÚ‡˚È ÂÍÓ‰
-if(time() - $time['record_day'] > filemtime('cache/timefile.log')){// ≈ÒÎË ‚ÂÏÂÌÌÓÈ Ù‡ÈÎ ÒÓÁ‰‡Ì ·ÓÎ¸¯Â ‰Ìˇ Ì‡Á‡‰
-	file_put_contents('cache/timefile.log', '');// ÔÂÂÁ‡ÔËÒ˚‚‡ÂÏ ‚ÂÏÂÌÌ˚È Ù‡ÈÎ
-	file_put_contents('cache/record_day.log', $all['po']);// Ë ÔÂÂÁ‡ÔËÒ˚‚‡ÂÏ ÚÂÔÂÂ¯ÌËÈ ÓÌÎ‡ÈÌ
-	$record['day'] = $all['po'];// œËÒ‚ÓËÚ¸ ÔÂÂÏÂÌÌÓÈ ÓÌÎ‡ÈÌ
+// –†–µ–∫–æ—Ä–¥ –∑–∞ –¥–µ–Ω—å
+$file['record_day'] = file_get_contents('cache/record_day.log');// –ß–∏—Å–ª–æ –≤—Ä–µ–º–µ–Ω–Ω–æ–≥–æ
+if($all['po'] > $file['record_day']) {// –ï—Å–ª–∏ –æ–Ω–ª–∞–π–Ω –±–æ–ª—å—à–µ
+	file_put_contents('cache/record_day.log', $all['po']);// –ó–∞–ø–∏—Å–∞—Ç—å –Ω–æ–≤—ã–π —Ä–µ–∫–æ—Ä–¥
+	$record['day'] = $all['po'];// –ü—Ä–∏—Å–≤–æ–∏—Ç—å –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π –æ–Ω–ª–∞–π–Ω
+} else// –µ—Å–ª–∏ –Ω–µ—Ç
+	$record['day'] = $file['record_day'];// –ø—Ä–∏—Å–≤–æ–∏—Ç—å —Å—Ç–∞—Ä—ã–π —Ä–µ–∫–æ—Ä–¥
+if(time() - $time['record_day'] > filemtime('cache/timefile.log')){// –ï—Å–ª–∏ –≤—Ä–µ–º–µ–Ω–Ω–æ–π —Ñ–∞–π–ª —Å–æ–∑–¥–∞–Ω –±–æ–ª—å—à–µ –¥–Ω—è –Ω–∞–∑–∞–¥
+	file_put_contents('cache/timefile.log', '');// –ø–µ—Ä–µ–∑–∞–ø–∏—Å—ã–≤–∞–µ–º –≤—Ä–µ–º–µ–Ω–Ω—ã–π —Ñ–∞–π–ª
+	file_put_contents('cache/record_day.log', $all['po']);// –∏ –ø–µ—Ä–µ–∑–∞–ø–∏—Å—ã–≤–∞–µ–º —Ç–µ–ø–µ—Ä–µ—à–Ω–∏–π –æ–Ω–ª–∞–π–Ω
+	$record['day'] = $all['po'];// –ü—Ä–∏—Å–≤–æ–∏—Ç—å –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π –æ–Ω–ª–∞–π–Ω
 }
 
-$all['percent'] = @floor(($all['po']/$all['pm'])*100);// % Ó·˘Â„Ó ÓÌÎ‡ÈÌ‡
-$all['date'] = date_in_text(filemtime('cache/record.log'));// ‚˚‚Ó‰ Í‡ÒË‚ÓÈ ‰‡Ú˚ ËÁÏÂÌÂÌËˇ Ù‡ÈÎ‡
-require_once 'template/all.php';// ¬˚‚Ó‰ËÏ Ó·˘ËÈ ÓÌÎ‡ÈÌ
+$all['percent'] = @floor(($all['po']/$all['pm'])*100);// % –æ–±—â–µ–≥–æ –æ–Ω–ª–∞–π–Ω–∞
+$all['date'] = date_in_text(filemtime('cache/record.log'));// –≤—ã–≤–æ–¥ –∫—Ä–∞—Å–∏–≤–æ–π –¥–∞—Ç—ã –∏–∑–º–µ–Ω–µ–Ω–∏—è —Ñ–∞–π–ª–∞
+require_once 'template/all.php';// –í—ã–≤–æ–¥–∏–º –æ–±—â–∏–π –æ–Ω–ª–∞–π–Ω
 
-echo base64_decode(date_in_text(false, true));// ƒÂÎ‡ÂÏ ÔÓ‰ÔËÒ¸
-file_put_contents($file['template'], ob_get_contents());// —Óı‡ÌˇÂÏ ‚˚‚Ó‰ ‚ Ù‡ÈÎ
+echo base64_decode(date_in_text(false, true));// –î–µ–ª–∞–µ–º –ø–æ–¥–ø–∏—Å—å
+file_put_contents($file['template'], ob_get_contents());// –°–æ—Ö—Ä–∞–Ω—è–µ–º –≤—ã–≤–æ–¥ –≤ —Ñ–∞–π–ª
 
 
 
@@ -61,12 +61,12 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 		if(!$in = @fsockopen($address, 25565, $errno, $errstr, $timeout))
 			return [
 				'address' => $address,
-				'error' => '¬˚ÍÎ˛˜ÂÌ'
+				'error' => '–í—ã–∫–ª—é—á–µ–Ω'
 			];
 		if(round((microtime(true)-$thetime)*1000) > $timeout * 1000)
 			return [
 				'address' => $address,
-				'error' => '¡ÓÎ¸¯ÓÈ ÔËÌ„'
+				'error' => '–ë–æ–ª—å—à–æ–π –ø–∏–Ω–≥'
 			];
 		@stream_set_timeout($in, $timeout);
 		$ping = round((microtime(true)-$thetime)*1000);
@@ -76,7 +76,7 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 		if($Len < 4 || $data[0] !== "\xFF")
 			return [
 				'address' => $address,
-				'error' => 'ÕÂËÁ‚ÂÒÚÌÓÂ ˇ‰Ó'
+				'error' => '–ù–µ–∏–∑–≤–µ—Å—Ç–Ω–æ–µ —è–¥—Ä–æ'
 			];
 		$data = substr($data, 3);
 		$data = iconv('UTF-16BE', 'UTF-8', $data);
@@ -108,7 +108,7 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 		$this->socket = @fsockopen('udp://'.$address, 25565, $ErrNo, $ErrStr, $timeout);
 		if($this->socket === false)
 			return [
-				'error' => '¬˚ÍÎ˛˜ÂÌ',
+				'error' => '–í—ã–∫–ª—é—á–µ–Ω',
 				'address' => $address
 			];
 		stream_set_timeout($this->socket, $timeout);
@@ -117,14 +117,14 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 		$info = ['ping' => round((microtime(true)-$thetime)*1000)];
 		$data = $this->writedata(self :: STATISTIC, $Challenge.Pack('c*', 0x00, 0x00, 0x00, 0x00));
 		if(!$data)
-			return $this->getp($address, $timeout);// œÓ·ÛÂÏ ÔÓÎÛ˜ËÚ¸ ‰‡ÌÌ˚Â Ó·˚˜Ì˚Ï ÒÔÓÒÓ·ÓÏ
+			return $this->getp($address, $timeout);// –ü—Ä–æ–±—É–µ–º –ø–æ–ª—É—á–∏—Ç—å –¥–∞–Ω–Ω—ã–µ –æ–±—ã—á–Ω—ã–º —Å–ø–æ—Å–æ–±–æ–º
 		fclose($this->socket);
 		$Last = '';
 		$data = substr($data, 11);
 		$data = explode("\x00\x00\x01player_\x00\x00", $data);
 		if(count($data) !== 2)
 			return [
-				'error' => 'ÕÂÛ‰‡˜Ì‡ˇ ‰Â¯ËÙ‡ˆËˇ ËÏÂÌ',
+				'error' => '–ù–µ—É–¥–∞—á–Ω–∞—è –¥–µ—à–∏—Ñ—Ä–∞—Ü–∏—è –∏–º–µ–Ω',
 				'address' => $address
 			];
 		$info['names'] = explode("\x00", substr($data[1], 0, -2));
@@ -173,19 +173,19 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 		$Length = strlen($command);
 		if( $Length !== fwrite($this->socket, $command, $Length))
 			return [
-				'error' => 'ÕÂÛ‰‡˜Ì˚È Á‡ÔÓÒ'
+				'error' => '–ù–µ—É–¥–∞—á–Ω—ã–π –∑–∞–ø—Ä–æ—Å'
 			];
 		$data = fread($this->socket, 4096);
 		if( $data === false )
 			return [
-				'error' => 'ÕÂ Û‰‡ÎÓÒ¸ ÔÓ˜ËÚ‡Ú¸ ÓÚ‚ÂÚ'
+				'error' => '–ù–µ —É–¥–∞–ª–æ—Å—å –ø—Ä–æ—á–∏—Ç–∞—Ç—å –æ—Ç–≤–µ—Ç'
 			];
 		if(strlen($data) < 5 || $data[0] != $command[2])
 			return false;
 		return substr($data, 5);
 	}
 	private function motd($text) {
-		$mass = explode('ß', $text);
+		$mass = explode('¬ß', $text);
 		foreach ($mass as $val)
 			$out .= substr($val, 1);
 		return $out;
@@ -200,10 +200,10 @@ class MinecraftServer {// Class written by xPaw & modded by book777
 	}
 }
 
-function date_in_text($data, $up = false) {// ƒ‡Ú‡ ‰Îˇ ÂÍÓ‰Ó‚ + ÔÓ‰ÔËÒ¸
+function date_in_text($data, $up = false) {// –î–∞—Ç–∞ –¥–ª—è —Ä–µ–∫–æ—Ä–¥–æ–≤ + –ø–æ–¥–ø–∏—Å—å
 	$iz = array("Jan",		"Feb",		"Mar",		"Apr",		"May",	"Jun",		"Jul",		"Aug",		"Sep",			"Jct",			"Nov",		"Dec");
-	$v = array("ˇÌ‚‡ˇ",	"ÙÂ‚‡Îˇ",	"Ï‡Ú‡",	"‡ÔÂÎˇ",	"Ï‡ˇ",	"Ë˛Ìˇ",	"Ë˛Îˇ",	"‡‚„ÛÒÚ‡",	"ÒÂÌÚˇ·ˇ",	"ÓÍÚˇ·ˇ",	"ÌÓˇ·ˇ",	"‰ÂÍ‡·ˇ");
-	$vblhod = str_replace($iz, $v, date("j M ‚ H:i", $data));if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
+	$v = array("—è–Ω–≤–∞—Ä—è",	"—Ñ–µ–≤–∞–ª—è",	"–º–∞—Ä—Ç–∞",	"–∞–ø—Ä–µ–ª—è",	"–º–∞—è",	"–∏—é–Ω—è",	"–∏—é–ª—è",	"–∞–≤–≥—É—Å—Ç–∞",	"—Å–µ–Ω—Ç—è–±—Ä—è",	"–æ–∫—Ç—è–±—Ä—è",	"–Ω–æ—è–±—Ä—è",	"–¥–µ–∫–∞–±—Ä—è");
+	$vblhod = str_replace($iz, $v, date("j M –≤ H:i", $data));if($up) return 'PCEtLSBieSBib29rNzc3IHJ1YnVra2l0Lm9yZy90aHJlYWRzLzY0NzQyIC0tPg==';
 	return $vblhod;
 }
 ?>
