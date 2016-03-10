@@ -1,6 +1,7 @@
 # legoMON
 
 Скрипт мониторинга игровых серверов minecraft
+https://mymine.su/threads/129/ - шаблоны
 
  Устанавливаем папку legoMON в корень сайта
 
